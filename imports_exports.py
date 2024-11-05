@@ -1,6 +1,6 @@
 # Here is where we will write our code
 
-class transaction: 
+class Transaction: 
     """ 
     represents trade transaction
     
