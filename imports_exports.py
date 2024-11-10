@@ -36,33 +36,7 @@ class Transaction:
         
     returns:
         list (transactions): list of transaction objects
-        """ 
-    
-    def add_transaction(transactions, transaction):
         """
-        add new transaction to dataset
-    
-        parameters: 
-        tranasactions (list [transaction]): current transactions list
-        transaction (transaction): new transaction 
-    
-        returns: 
-            new transaction list
-        """
-    def delete_transaction(transactions, transaction_id):
-        """
-    delete transaction by id
-    
-        parameters:
-            transactions (list[transaction]): current transactions
-            transaction_id (str): transaction id to delete
-        
-        returns: 
-            boolean: true if deleted, false otherwise
-        """
-        
-        
-        
         
 class Product:
     """
