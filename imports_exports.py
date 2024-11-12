@@ -259,7 +259,7 @@ def main():
     while True:
         print("\nImport/Export Management System")
         print("1. View total trade value")
-        print("2. View transactions by date range")
+        print("2. View transactions by date range (01-01-2020 - 31-12-2023)")
         print("3. View transactions by country")
         print("4. View transactions by product")
         print("5. Run unit tests")
