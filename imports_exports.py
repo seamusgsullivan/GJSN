@@ -88,7 +88,7 @@ class ImportExportSystem:
                 filtered_transactions.append(t)
         return filtered_transactions
     
-    def filter_by_product(self, transactions, product_name):
+    def filter_by_product(self, product_name):
         """
         Filters transactions by a specific product.
 
@@ -100,12 +100,12 @@ class ImportExportSystem:
             list[Transaction]: A list of transactions involving the specified product.
         """
         filtered_transactions = []
-        for t in transactions:
+        for t in self.transactions:
             if t.product == product_name:
                 filtered_transactions.append(t)
         return filtered_transactions
     
-    def filter_by_country(self, transactions, country_name):
+    def filter_by_country(self, country_name):
         """
         Filters transactions by a specific country.
     
@@ -117,9 +117,33 @@ class ImportExportSystem:
             list[Transaction]: A list of transactions involving the specified country.
         """
         filtered_transactions = []
-        for t in transactions:
+        for t in self.transactions:
             if t.country == country_name:
                 filtered_transactions.append(t)
+        return filtered_transactions
+    
+    def filter_by_value(self, value, operator):
+        """
+        Filters transactions by a specific value and operator.
+        
+        Parameters:
+            value (float): The value to filter by.
+            operator (str): The operator to use for comparison ('greater than', 'less than', 'equal to').
+            
+        Returns:
+            list[Transaction]: A list of transactions that meet the specified criteria.
+        """
+        filtered_transactions = []
+        for t in self.transactions:
+            if operator == 'greater than':
+                if t.value > value:
+                    filtered_transactions.append(t)
+            elif operator == 'less than':
+                if t.value < value:
+                    filtered_transactions.append(t)
+            elif operator == 'equal to':
+                if t.value == value:
+                    filtered_transactions.append(t)
         return filtered_transactions
     
     def filtered_total_value(self, filtered_transactions):
@@ -227,10 +251,11 @@ def main():
         print("2. View transactions by date range (01-01-2020 - 31-12-2023)")
         print("3. View transactions by country")
         print("4. View transactions by product")
-        print("5. Run unit tests")
-        print("6. Exit")
+        print("5. View transactions by value (0 - 10000)")
+        print("6. Run unit tests")
+        print("7. Exit")
 
-        choice = input("Enter your choice (1-6): ")
+        choice = input("Enter your choice (1-7): ")
 
         if choice == "1":
             total_value = system.total_trade_value()
@@ -276,16 +301,30 @@ def main():
                 print(f"Total trade value for transactions involving {product_name}: ${round(total_value, 2)}")
             else:
                 print(f"No transactions found for {product_name}.")
-        
+                
         elif choice == "5":
+            value = float(input("Enter the value to filter transactions by: "))
+            operator = input("Enter the operator ('greater than', 'less than', 'equal to'): ")
+            transactions = system.filter_by_value(value, operator)
+            total_value = system.filtered_total_value(transactions)
+            if transactions:
+                print(f"Transactions with a value {operator} {value}:")
+                for t in transactions:
+                    print(f"Transaction_ID: {t.transaction_ID} - Product: {t.product} - Country: {t.country} -  Value: {t.value} - Date: {t.date}")
+                print(f"Total transactions: {len(transactions)}")
+                print(f"Total trade value for transactions with a value {operator} ${value}: ${round(total_value, 2)}")
+            else:
+                print(f"No transactions found with a value {operator} {value}.")
+        
+        elif choice == "6":
             run_unit_tests()
                 
-        elif choice == "6":
+        elif choice == "7":
             print("Exiting program...")
             break
         
         else:
-            print("Invalid choice. Please enter a number between 1 and 6.")
+            print("Invalid choice. Please enter a number between 1 and 7.")
 
 if __name__ == "__main__":
     main()
