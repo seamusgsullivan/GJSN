@@ -69,7 +69,7 @@ class ImportExportSystem:
             total_value += t.value
         return total_value
 
-    def transactions_by_date_range(self, start_date, end_date):
+    def filter_by_date_range(self, start_date, end_date):
         """
         Filters transactions by a given date range.
         
@@ -88,50 +88,7 @@ class ImportExportSystem:
                 filtered_transactions.append(t)
         return filtered_transactions
     
-    def filtered_total_value_by_date_range(self, start_date, end_date):
-        """
-        Calculates the total value of transactions within the given date range.
-    
-        Parameters:
-            start_date (str): The start date (inclusive) in the format 'dd-mm-yyyy'.
-            end_date (str): The end date (inclusive) in the format 'dd-mm-yyyy'.
-    
-        Returns:
-            float: The total value of transactions within the specified date range.
-        """
-        
-        start = Transaction.parse_date(start_date)
-        end = Transaction.parse_date(end_date)
-        total_value = 0
-        for transaction in self.transactions:
-            if start <= Transaction.parse_date(transaction.date) <= end:
-                total_value += transaction.value
-        return total_value
-
-    def filtered_total_value(self, filter_by=None, value=None):
-        """
-        Calculates the total value of transactions filtered by a specific attribute.
-
-        Parameters:
-            filter_by (str): The attribute to filter transactions by (e.g., 'country', 'product').
-            value (str): The value to match for filtering (e.g., 'Colombia' for filter_by='country').
-
-        Returns:
-            float: The total value of transactions matching the filter.
-        """
-        filtered_transactions = self.transactions
-
-        if filter_by == 'product' and value:
-            filtered_transactions = self.filter_by_product(filtered_transactions, value)
-        elif filter_by == 'country' and value:
-            filtered_transactions = self.filter_by_country(filtered_transactions, value)
-        
-        total_value = 0
-        for t in filtered_transactions:
-            total_value += t.value
-        return total_value
-
-    def filter_by_product(self, transactions, product_name):
+    def filter_by_product(self, product_name):
         """
         Filters transactions by a specific product.
 
@@ -143,12 +100,12 @@ class ImportExportSystem:
             list[Transaction]: A list of transactions involving the specified product.
         """
         filtered_transactions = []
-        for t in transactions:
+        for t in self.transactions:
             if t.product == product_name:
                 filtered_transactions.append(t)
         return filtered_transactions
     
-    def filter_by_country(self, transactions, country_name):
+    def filter_by_country(self, country_name):
         """
         Filters transactions by a specific country.
     
@@ -160,10 +117,49 @@ class ImportExportSystem:
             list[Transaction]: A list of transactions involving the specified country.
         """
         filtered_transactions = []
-        for t in transactions:
+        for t in self.transactions:
             if t.country == country_name:
                 filtered_transactions.append(t)
         return filtered_transactions
+    
+    def filter_by_value(self, value, operator):
+        """
+        Filters transactions by a specific value and operator.
+        
+        Parameters:
+            value (float): The value to filter by.
+            operator (str): The operator to use for comparison ('greater than', 'less than', 'equal to').
+            
+        Returns:
+            list[Transaction]: A list of transactions that meet the specified criteria.
+        """
+        filtered_transactions = []
+        for t in self.transactions:
+            if operator == 'greater than':
+                if t.value > value:
+                    filtered_transactions.append(t)
+            elif operator == 'less than':
+                if t.value < value:
+                    filtered_transactions.append(t)
+            elif operator == 'equal to':
+                if t.value == value:
+                    filtered_transactions.append(t)
+        return filtered_transactions
+    
+    def filtered_total_value(self, filtered_transactions):
+        """
+        Calculates the total value of a filtered list of transactions.
+    
+        Parameters:
+            filtered_transactions (list[Transaction]): The list of filtered transactions to calculate the total value for.
+    
+        Returns:
+            float: The total value of the given transactions.
+        """
+        total_value = 0
+        for t in filtered_transactions:
+            total_value += t.value
+        return total_value
 
 def load_data(file_path):
     """
@@ -208,38 +204,31 @@ def run_unit_tests():
     else:
         print("Test 1 (Total trade value): Failed!")
 
-    # Test 2: Check transactions by date range
+    # Test 2: Check filter by date range
     start_date = "01-01-2023"
     end_date = "31-12-2023"
-    transactions = system.transactions_by_date_range(start_date, end_date)
+    transactions = system.filter_by_date_range(start_date, end_date)
     if transactions:
         print(f"Test 2 (Transactions by date range): Passed! Found {len(transactions)} transaction(s).")
     else:
         print("Test 2 (Transactions by date range): Failed!")
 
-    # Test 3: Check report value generation (example with 'country' filter)
-    report_value = system.filtered_total_value("country", "Colombia")
-    if report_value >= 0:
-        print("Test 3 (Generate report by country): Passed!")
-    else:
-        print("Test 3 (Generate report by country): Failed!")
-
-    # Test 4: Check filtering by product
+    # Test 3: Check filtering by product
     product_transactions = system.filter_by_product(system.transactions, "agency")
     if product_transactions:
         print(f"Test 4 (Filter by product): Passed! Found {len(product_transactions)} transaction(s).")
     else:
         print("Test 4 (Filter by product): Failed!")
         
-    # Test 5: Check filtered transactions by country
+    # Test 4: Check filtered transactions by country
     country_transactions = system.filter_by_country(system.transactions, "Italy")
     if country_transactions:
         print(f"Test 5 (Filter by country): Passed! Found {len(country_transactions)} transaction(s).")
     else:
         print("Test 5 (Filter by country): Failed!")
     
-    # Test 6: Check report value generation for date range
-    report_value = system.filtered_total_value_by_date_range("23-09-2022", "12-03-2023")
+    # Test 5: Check filtered total value
+    report_value = system.filtered_total_value(country_transactions)
     if report_value >= 0:
         print("Test 6 (Generate report by date range): Passed!")
     else:
@@ -259,13 +248,14 @@ def main():
     while True:
         print("\nImport/Export Management System")
         print("1. View total trade value")
-        print("2. View transactions by date range")
+        print("2. View transactions by date range (01-01-2020 - 31-12-2023)")
         print("3. View transactions by country")
         print("4. View transactions by product")
-        print("5. Run unit tests")
-        print("6. Exit")
+        print("5. View transactions by value (0 - 10000)")
+        print("6. Run unit tests")
+        print("7. Exit")
 
-        choice = input("Enter your choice (1-6): ")
+        choice = input("Enter your choice (1-7): ")
 
         if choice == "1":
             total_value = system.total_trade_value()
@@ -274,8 +264,8 @@ def main():
         elif choice == "2":
             start_date = input("Enter the start date (dd-mm-yyyy): ")
             end_date = input("Enter the end date (dd-mm-yyyy): ")
-            total_value = system.filtered_total_value_by_date_range(start_date, end_date)
-            transactions = system.transactions_by_date_range(start_date, end_date)
+            transactions = system.filter_by_date_range(start_date, end_date)
+            total_value = system.filtered_total_value(transactions)
             if transactions:
                 print(f"Transactions between {start_date} and {end_date}:")
                 for t in transactions:
@@ -289,7 +279,7 @@ def main():
         elif choice == "3":
             country = input("Enter the country to filter transactions by: ")
             transactions = system.filter_by_country(system.transactions, country)
-            total_value = system.filtered_total_value("country", country)
+            total_value = system.filtered_total_value(transactions)
             if transactions:
                 print(f"Transactions for {country}:")
                 for t in transactions:
@@ -302,7 +292,7 @@ def main():
         elif choice == "4":
             product_name = input("Enter the product to filter transactions by: ")
             transactions = system.filter_by_product(system.transactions, product_name)
-            total_value = system.filtered_total_value("product", product_name)
+            total_value = system.filtered_total_value(transactions)
             if transactions:
                 print(f"Transactions for {product_name}:")
                 for t in transactions:
@@ -311,16 +301,30 @@ def main():
                 print(f"Total trade value for transactions involving {product_name}: ${round(total_value, 2)}")
             else:
                 print(f"No transactions found for {product_name}.")
-        
+                
         elif choice == "5":
+            value = float(input("Enter the value to filter transactions by: "))
+            operator = input("Enter the operator ('greater than', 'less than', 'equal to'): ")
+            transactions = system.filter_by_value(value, operator)
+            total_value = system.filtered_total_value(transactions)
+            if transactions:
+                print(f"Transactions with a value {operator} {value}:")
+                for t in transactions:
+                    print(f"Transaction_ID: {t.transaction_ID} - Product: {t.product} - Country: {t.country} -  Value: {t.value} - Date: {t.date}")
+                print(f"Total transactions: {len(transactions)}")
+                print(f"Total trade value for transactions with a value {operator} ${value}: ${round(total_value, 2)}")
+            else:
+                print(f"No transactions found with a value {operator} {value}.")
+        
+        elif choice == "6":
             run_unit_tests()
                 
-        elif choice == "6":
+        elif choice == "7":
             print("Exiting program...")
             break
         
         else:
-            print("Invalid choice. Please enter a number between 1 and 6.")
+            print("Invalid choice. Please enter a number between 1 and 7.")
 
 if __name__ == "__main__":
     main()
