@@ -1,92 +1,80 @@
 import pytest
-from imports_exports import Transaction, ImportExportSystem, load_data
+from datetime import datetime
+from imports_exports import ImportExportSystem, Transaction
 
-# To run: pytest test_imports_exports.py
+# To run: python -m pytest
 
 @pytest.fixture
 def setup_system():
-    """Loads the system and transactions for each test."""
-    file_path = 'Imports_Exports_Dataset.csv'
-    transactions = load_data(file_path)
-    system = ImportExportSystem(transactions)
-    return system
+    transactions = [
+        Transaction(transaction_ID="1", country="USA", product="Electronics", value=1000.0, date="01-01-2021"),
+        Transaction(transaction_ID="2", country="Canada", product="Electronics", value=1500.0, date="15-01-2021"),
+        Transaction(transaction_ID="3", country="USA", product="Furniture", value=2000.0, date="20-01-2021"),
+        Transaction(transaction_ID="4", country="Mexico", product="Electronics", value=2500.0, date="25-01-2021"),
+        Transaction(transaction_ID="5", country="USA", product="Electronics", value=3000.0, date="30-01-2021")
+    ]
+    return ImportExportSystem(transactions)
 
-def test_invalid_country(setup_system):
-    """Test filtering by an invalid country name."""
+def test_filter_transactions_by_country(setup_system):
     system = setup_system
-    invalid_country = "Atlantis"  # Country doesn't exist
-    transactions = system.filter_by_country(invalid_country)
-    assert len(transactions) == 0, f"Expected 0 transactions for invalid country '{invalid_country}', but found {len(transactions)}."
+    filtered_transactions = system.filter_transactions(country="USA")
+    assert len(filtered_transactions) == 3, f"Expected 3 transactions, but got {len(filtered_transactions)}"
 
-def test_empty_country_name(setup_system):
-    """Test filtering by an empty country name."""
+def test_filter_transactions_by_product(setup_system):
     system = setup_system
-    empty_country = ""  # Edge case: empty string
-    transactions = system.filter_by_country(empty_country)
-    assert len(transactions) == 0, "Expected 0 transactions for empty country name, but found transactions."
+    filtered_transactions = system.filter_transactions(product="Electronics")
+    assert len(filtered_transactions) == 4, f"Expected 4 transactions, but got {len(filtered_transactions)}"
 
-def test_invalid_product_name(setup_system):
-    """Test filtering by an invalid product name."""
+def test_filter_transactions_by_date_range(setup_system):
     system = setup_system
-    invalid_product = "Unicorn Horns"  # Product doesn't exist
-    transactions = system.filter_by_product(invalid_product)
-    assert len(transactions) == 0, f"Expected 0 transactions for invalid product '{invalid_product}', but found {len(transactions)}."
+    filtered_transactions = system.filter_transactions(date_range=("01-01-2021", "31-01-2021"))
+    assert len(filtered_transactions) == 5, f"Expected 5 transactions, but got {len(filtered_transactions)}"
 
-def test_invalid_operator(setup_system):
-    """Test filtering by value with an invalid operator."""
+def test_filter_transactions_by_multiple_criteria(setup_system):
     system = setup_system
-    value = 10000
-    invalid_operator = "less or equal to"  # Invalid operator
-    transactions = system.filter_by_value(value, invalid_operator)
-    assert len(transactions) == 0, f"Expected 0 transactions for invalid operator '{invalid_operator}', but found {len(transactions)}."
+    filtered_transactions = system.filter_transactions(country="USA", product="Electronics")
+    assert len(filtered_transactions) == 2, f"Expected 2 transactions, but got {len(filtered_transactions)}"
 
-def test_empty_operator(setup_system):
-    """Test filtering by value with an empty operator string."""
+def test_filter_transactions_empty_filters(setup_system):
     system = setup_system
-    value = 10000
-    empty_operator = ""  # Edge case: empty operator
-    transactions = system.filter_by_value(value, empty_operator)
-    assert len(transactions) == 0, "Expected 0 transactions for empty operator, but found transactions."
+    filtered_transactions = system.filter_transactions()
+    assert len(filtered_transactions) == len(system.transactions), "Expected all transactions to be returned when no filters are applied."
 
-def test_invalid_date_format(setup_system):
-    """Test filtering by an invalid date format."""
+def test_filter_transactions_empty_date_range(setup_system):
     system = setup_system
-    start_date = "01-13-2023"  # Invalid date (13th month)
-    end_date = "31-12-2023"
-    with pytest.raises(ValueError) as excinfo:
-        system.filter_by_date_range(start_date, end_date)
-    assert "time data" in str(excinfo.value), f"Expected ValueError for invalid date format, but got: {excinfo.value}"
+    filtered_transactions = system.filter_transactions(date_range=("", ""))
+    assert len(filtered_transactions) == 0, "Expected 0 transactions for empty date range, but found transactions."
 
-def test_start_date_after_end_date(setup_system):
-    """Test filtering with a start date that comes after the end date."""
+def test_filter_transactions_invalid_value_format(setup_system):
     system = setup_system
-    start_date = "31-12-2023"
-    end_date = "01-01-2023"
-    transactions = system.filter_by_date_range(start_date, end_date)
-    assert len(transactions) == 0, f"Expected 0 transactions for invalid date range '{start_date} to {end_date}', but found {len(transactions)}."
-
-def test_large_numeric_value(setup_system):
-    """Test filtering by an unusually large value."""
-    system = setup_system
-    large_value = 10000000  # Very large trade value
-    operator = "greater than"
-    transactions = system.filter_by_value(large_value, operator)
-    assert len(transactions) == 0, f"Expected 0 transactions for value greater than {large_value}, but found {len(transactions)}."
-    
-def test_invalid_date_format_letters(setup_system):
-    """Test filtering by a date with random letters (invalid format)."""
-    system = setup_system
-    start_date = "abcdefgh"  # Invalid date format (random letters)
-    end_date = "2023-12-31"
-    with pytest.raises(ValueError) as excinfo:
-        system.filter_by_date_range(start_date, end_date)
-    assert "time data" in str(excinfo.value), f"Expected ValueError for invalid date format, but got: {excinfo.value}"
-
-def test_invalid_value_format_letters(setup_system):
-    """Test filtering by a value with random letters (invalid format)."""
-    system = setup_system
-    invalid_value = "abc123"  # Invalid value format (letters and numbers)
-    operator = "greater than"
     with pytest.raises(TypeError) as excinfo:
-        system.filter_by_value(invalid_value, operator)
+        system.filter_transactions(min_value="invalid_value")
     assert "not supported between instances of 'float' and 'str'" in str(excinfo.value), f"Expected TypeError for invalid value format, but got: {excinfo.value}"
+
+def test_add_transaction(setup_system):
+    system = setup_system
+    system.add_transaction("6", "Brazil", "Coffee", 500.0, "01-02-2021")
+    assert len(system.transactions) == 6, "Expected 6 transactions after adding a new one, but found a different number."
+
+def test_update_transaction(setup_system):
+    system = setup_system
+    updated = system.update_transaction("1", country="UK", product="Books", value=1200.0, date="02-01-2021")
+    assert updated, "Expected transaction to be updated successfully."
+    transaction = system.search_transaction_by_id("1")
+    assert transaction.country == "UK", "Expected country to be updated to UK."
+    assert transaction.product == "Books", "Expected product to be updated to Books."
+    assert transaction.value == 1200.0, "Expected value to be updated to 1200.0."
+    assert transaction.date == "02-01-2021", "Expected date to be updated to 02-01-2021."
+
+def test_delete_transaction(setup_system):
+    system = setup_system
+    deleted = system.delete_transaction("1")
+    assert deleted, "Expected transaction to be deleted successfully."
+    transaction = system.search_transaction_by_id("1")
+    assert transaction is None, "Expected transaction to be None after deletion."
+
+def test_search_transaction_by_id(setup_system):
+    system = setup_system
+    transaction = system.search_transaction_by_id("1")
+    assert transaction is not None, "Expected to find transaction with ID 1."
+    assert transaction.transaction_ID == "1", "Expected transaction ID to be 1."
