@@ -1,7 +1,7 @@
 # Import/Export Management System
 INST326 Final Project by Team GJSN
 
-Overview
+Overview:
 The Import/Export Management System is a Python command-line program designed to help users manage, organize, and analyze international trade transactions. The program reads transaction data from a CSV file, processes it, and provides useful insights, such as identifying trends in imports and exports, calculating total values, and categorizing data. The system helps businesses streamline their import/export processes by providing essential data-driven information in an accessible format.
 
 How to Run the Program:
