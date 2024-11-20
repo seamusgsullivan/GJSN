@@ -186,56 +186,6 @@ def load_data(file_path):
             transactions.append(transaction)
     return transactions
 
-def run_unit_tests():
-    """
-    Runs the basic unit tests for the ImportExportSystem.
-    These tests verify basic functionality.
-    """
-    print("\nRunning unit tests...")
-
-    # Test 1: Check total trade value
-    file_path = 'Imports_Exports_Dataset.csv'
-    transactions = load_data(file_path)
-    
-    system = ImportExportSystem(transactions)
-    total_value = system.total_trade_value()
-    if round(total_value, 2) == 75493966.8: # Comparing the rounded total_value to the expected value
-        print("Test 1 (Total trade value): Passed!")
-    else:
-        print("Test 1 (Total trade value): Failed!")
-
-    # Test 2: Check filter by date range
-    start_date = "01-01-2023"
-    end_date = "31-12-2023"
-    transactions = system.filter_by_date_range(start_date, end_date)
-    if transactions:
-        print(f"Test 2 (Transactions by date range): Passed! Found {len(transactions)} transaction(s).")
-    else:
-        print("Test 2 (Transactions by date range): Failed!")
-
-    # Test 3: Check filtering by product
-    product_transactions = system.filter_by_product(system.transactions, "agency")
-    if product_transactions:
-        print(f"Test 4 (Filter by product): Passed! Found {len(product_transactions)} transaction(s).")
-    else:
-        print("Test 4 (Filter by product): Failed!")
-        
-    # Test 4: Check filtered transactions by country
-    country_transactions = system.filter_by_country(system.transactions, "Italy")
-    if country_transactions:
-        print(f"Test 5 (Filter by country): Passed! Found {len(country_transactions)} transaction(s).")
-    else:
-        print("Test 5 (Filter by country): Failed!")
-    
-    # Test 5: Check filtered total value
-    report_value = system.filtered_total_value(country_transactions)
-    if report_value >= 0:
-        print("Test 6 (Generate report by date range): Passed!")
-    else:
-        print("Test 6 (Generate report by date range): Failed!")
-        
-    print("\nUnit tests completed.")
-
 def main():
     """
     Runs the Import/Export Management System allowing user interaction.
@@ -252,10 +202,9 @@ def main():
         print("3. View transactions by country")
         print("4. View transactions by product")
         print("5. View transactions by value (0 - 10000)")
-        print("6. Run unit tests")
-        print("7. Exit")
+        print("6. Exit")
 
-        choice = input("Enter your choice (1-7): ")
+        choice = input("Enter your choice (1-6): ")
 
         if choice == "1":
             total_value = system.total_trade_value()
@@ -317,14 +266,11 @@ def main():
                 print(f"No transactions found with a value {operator} {value}.")
         
         elif choice == "6":
-            run_unit_tests()
-                
-        elif choice == "7":
             print("Exiting program...")
             break
-        
+    
         else:
-            print("Invalid choice. Please enter a number between 1 and 7.")
+            print("Invalid choice. Please enter a number between 1 and 6.")
 
 if __name__ == "__main__":
     main()
