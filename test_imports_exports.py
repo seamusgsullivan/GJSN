@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime
 from imports_exports import ImportExportSystem, Transaction, parse_date
 
 # To run: python -m pytest
