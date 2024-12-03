@@ -1,3 +1,7 @@
+""""
+This program is an Import/Export Management System that allows users to filter, sort, add, update, delete, search, view summaries, and export transactions to CSV files.
+"""
+
 import csv
 from datetime import datetime
 
@@ -16,12 +20,15 @@ class Transaction:
         """
         Initializes a Transaction object with the given attributes.
         
-        Parameters:
+        Args:
             transaction_ID (str): The unique identifier for the transaction.
             product (str): The name of the product.
             country (str): The country of origin or destination.
             value (float): The monetary value of the transaction.
             date (datetime): The date the transaction took place.
+            
+        Side effects:
+            Initializes the Transaction object with the given attributes.
         """
         self.transaction_ID = transaction_ID
         self.product = product
@@ -40,8 +47,11 @@ class ImportExportSystem:
         """
         Initializes the ImportExportSystem with a list of transactions.
         
-        Parameters:
+        Args:
             transactions (list): A list of Transaction objects.
+            
+        Side effects:
+            Initializes the ImportExportSystem with the given list of transactions.
         """
         self.transactions = transactions
     
@@ -49,7 +59,7 @@ class ImportExportSystem:
         """
         Calculates the total value of a list of transactions.
     
-        Parameters:
+        Args:
             transactions (list[Transaction]): The list of transactions to calculate the total value for.
     
         Returns:
@@ -64,7 +74,7 @@ class ImportExportSystem:
         """
         Filters transactions based on the given criteria.
         
-        Parameters:
+        Args:
             date_range (tuple): A tuple containing start and end dates for filtering transactions.
             country (str): The country to filter transactions by.
             product (str): The product to filter transactions by.
@@ -95,7 +105,7 @@ class ImportExportSystem:
         """
         Adds a new transaction to the list of transactions.
         
-        Parameters:
+        Args:
             transaction_ID (str): The unique identifier for the transaction.
             country (str): The country of origin or destination.
             product (str): The name of the product.
@@ -109,7 +119,7 @@ class ImportExportSystem:
         """
         Updates an existing transaction with new information.
         
-        Parameters:
+        Args:
             transaction_ID (str): The unique identifier for the transaction to update.
             country (str): The new country value.
             product (str): The new product value.
@@ -136,7 +146,7 @@ class ImportExportSystem:
         """
         Deletes a transaction from the list of transactions.
         
-        Parameters:
+        Args:
             transaction_ID (str): The unique identifier for the transaction to delete.
             
         Returns:
@@ -152,7 +162,7 @@ class ImportExportSystem:
         """
         Searches for a transaction by its unique identifier.
         
-        Parameters:
+        Args:
             transaction_ID (str): The unique identifier to search for.
             
         Returns:
@@ -167,7 +177,7 @@ class ImportExportSystem:
         """
         Sorts transactions by value in either ascending or descending order.
         
-        Parameters:
+        Args:
             descending (bool): If True, sort in descending order; otherwise, sort in ascending order.
             
         Returns:
@@ -179,9 +189,12 @@ class ImportExportSystem:
         """
         Exports transactions to a CSV file.
         
-        Parameters:
+        Args:
             transactions (list[Transaction]): The list of transactions to export.
             filename (str): The name of the file to save the CSV data to.
+            
+        Side effects:
+            Writes transaction data to a CSV file with the given filename.
         """
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
@@ -193,8 +206,14 @@ class ImportExportSystem:
         """
         Generates a summary of the transactions.
         
+        Args:
+            transactions (list[Transaction]): The list of transactions to generate a summary for.
+            
         Returns:
             list: A list containing the total number of transactions, total trade value, and average trade value.
+        
+        Side effects:
+            Calculates the total number of transactions, total trade value, and average trade value. 
         """
         total_transactions = len(transactions)
         total_value = self.total_trade_value(transactions)
@@ -208,7 +227,7 @@ def parse_date(date):
     """
     Converts a date string in 'dd-mm-yyyy' format to a datetime object.
         
-    Parameters:
+    Args:
         date (str): The date string to be parsed.
         
     Returns:
@@ -220,11 +239,14 @@ def load_data(file_path):
     """
     Loads transaction data from a CSV file and returns a list of Transaction objects.
     
-    Parameters:
+    Args:
         file_path (str): The path to the CSV file containing transaction data.
     
     Returns:
         list: A list of Transaction objects loaded from the CSV file.
+        
+    Side effects:
+        Reads data from the CSV file and creates Transaction objects based on the data.
     """
     transactions = []
     with open(file_path, mode='r') as file:
