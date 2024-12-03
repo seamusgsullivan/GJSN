@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from imports_exports import ImportExportSystem, Transaction
+from imports_exports import ImportExportSystem, Transaction, parse_date
 
 # To run: python -m pytest
 
@@ -47,18 +47,68 @@ def test_filter_transactions_empty_filters(setup_system):
     filtered_transactions = system.filter_transactions()
     assert len(filtered_transactions) == len(system.transactions), "Expected all transactions to be returned when no filters are applied."
 
+# Test filter transactions with non-numeric value for min_value
+def test_filter_transactions_non_numeric_min_value(setup_system):
+    system = setup_system
+    with pytest.raises(TypeError) as excinfo:
+        system.filter_transactions(min_value="non_numeric_value")
+    assert "not supported between instances of 'float' and 'str'" in str(excinfo.value), f"Expected TypeError for non-numeric min_value, but got: {excinfo.value}"
+
+# Test filter transactions with non-numeric value for max_value
+def test_filter_transactions_non_numeric_max_value(setup_system):
+    system = setup_system
+    with pytest.raises(TypeError) as excinfo:
+        system.filter_transactions(max_value="non_numeric_value")
+    assert "not supported between instances of 'float' and 'str'" in str(excinfo.value), f"Expected TypeError for non-numeric max_value, but got: {excinfo.value}"
+
+# Test filter transactions with negative min_value
+def test_filter_transactions_negative_min_value(setup_system):
+    system = setup_system
+    filtered_transactions = system.filter_transactions(min_value=-1000.0)
+    assert len(filtered_transactions) == len(system.transactions), "Expected all transactions to be returned when min_value is negative."
+
+# Test filter transactions with negative max_value
+def test_filter_transactions_negative_max_value(setup_system):
+    system = setup_system
+    filtered_transactions = system.filter_transactions(max_value=-1000.0)
+    assert len(filtered_transactions) == 0, "Expected 0 transactions to be returned when max_value is negative."
+
+# Test filter transactions with min_value greater than max_value
+def test_filter_transactions_min_value_greater_than_max_value(setup_system):
+    system = setup_system
+    filtered_transactions = system.filter_transactions(min_value=3000.0, max_value=1000.0)
+    assert len(filtered_transactions) == 0, "Expected 0 transactions to be returned when min_value is greater than max_value."
+
+# Test filter transactions with invalid country format (numeric)
+def test_filter_transactions_invalid_country_format(setup_system):
+    system = setup_system
+    filtered_transactions = system.filter_transactions(country="12345")
+    assert len(filtered_transactions) == 0, "Expected 0 transactions for invalid country format, but found some transactions."
+
+# Test filter transactions with invalid product format (numeric)
+def test_filter_transactions_invalid_product_format(setup_system):
+    system = setup_system
+    filtered_transactions = system.filter_transactions(product="12345")
+    assert len(filtered_transactions) == 0, "Expected 0 transactions for invalid product format, but found some transactions."
+ 
+# Test filter transactions by a non-existent product
+def test_filter_transactions_non_existent_product(setup_system):
+    system = setup_system
+    filtered_transactions = system.filter_transactions(product="NonExistentProduct")
+    assert len(filtered_transactions) == 0, "Expected 0 transactions for a non-existent product, but found some transactions."
+
 # Test that no transactions are returned when an empty date range is provided
 def test_filter_transactions_empty_date_range(setup_system):
     system = setup_system
     filtered_transactions = system.filter_transactions(date_range=("", ""))
     assert len(filtered_transactions) == 0, "Expected 0 transactions for empty date range, but found transactions."
 
-# Test that an error is raised when an invalid value format is provided
-def test_filter_transactions_invalid_value_format(setup_system):
-    system = setup_system
-    with pytest.raises(TypeError) as excinfo:
-        system.filter_transactions(min_value="invalid_value")
-    assert "not supported between instances of 'float' and 'str'" in str(excinfo.value), f"Expected TypeError for invalid value format, but got: {excinfo.value}"
+# Test parse date with invalid date format
+def test_parse_date_invalid_format():
+    invalid_date = "invalid_date"
+    with pytest.raises(ValueError) as excinfo:
+        parse_date(invalid_date)
+    assert "time data 'invalid_date' does not match format '%d-%m-%Y'" in str(excinfo.value), f"Expected ValueError for invalid date format, but got: {excinfo.value}"
 
 # Test adding a new transaction
 def test_add_transaction(setup_system):
