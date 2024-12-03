@@ -216,7 +216,6 @@ def parse_date(date):
     """
     return datetime.strptime(date, "%d-%m-%Y")
 
-
 def load_data(file_path):
     """
     Loads transaction data from a CSV file and returns a list of Transaction objects.
@@ -234,75 +233,13 @@ def load_data(file_path):
         for row in reader:
             transaction = Transaction(
                 transaction_ID=row[0],
-                country=row[1],
                 product=row[2],
-                # import/export = row[3],
-                #Quantity = row[4],
+                country=row[1],
                 value=float(row[5]),
-                date=row[6]
-                # Category = row[7],
-                # Por = row[8],
-                # Customs_Code = row[9]  
+                date=parse_date(row[6])
             )
             transactions.append(transaction)
     return transactions
-
-def run_unit_tests():
-    """
-    Runs the basic unit tests for the ImportExportSystem.
-    These tests verify basic functionality.
-    """
-    print("\nRunning unit tests...")
-
-    # Test 1: Check total trade value
-    file_path = 'Imports_Exports_Dataset.csv'
-    transactions = load_data(file_path)
-    
-    system = ImportExportSystem(transactions)
-    total_value = system.total_trade_value()
-    if round(total_value, 2) == 75493966.8: # Comparing the rounded total_value to the expected value
-        print("Test 1 (Total trade value): Passed!")
-    else:
-        print("Test 1 (Total trade value): Failed!")
-
-    # Test 2: Check transactions by date range
-    start_date = "01-01-2023"
-    end_date = "31-12-2023"
-    transactions = system.transactions_by_date_range(start_date, end_date)
-    if transactions:
-        print(f"Test 2 (Transactions by date range): Passed! Found {len(transactions)} transaction(s).")
-    else:
-        print("Test 2 (Transactions by date range): Failed!")
-
-    # Test 3: Check report value generation (example with 'country' filter)
-    report_value = system.filtered_total_value("country", "Colombia")
-    if report_value >= 0:
-        print("Test 3 (Generate report by country): Passed!")
-    else:
-        print("Test 3 (Generate report by country): Failed!")
-
-    # Test 4: Check filtering by product
-    product_transactions = system.filter_by_product(system.transactions, "agency")
-    if product_transactions:
-        print(f"Test 4 (Filter by product): Passed! Found {len(product_transactions)} transaction(s).")
-    else:
-        print("Test 4 (Filter by product): Failed!")
-        
-    # Test 5: Check filtered transactions by country
-    country_transactions = system.filter_by_country(system.transactions, "Italy")
-    if country_transactions:
-        print(f"Test 5 (Filter by country): Passed! Found {len(country_transactions)} transaction(s).")
-    else:
-        print("Test 5 (Filter by country): Failed!")
-    
-    # Test 6: Check report value generation for date range
-    report_value = system.filtered_total_value_by_date_range("23-09-2022", "12-03-2023")
-    if report_value >= 0:
-        print("Test 6 (Generate report by date range): Passed!")
-    else:
-        print("Test 6 (Generate report by date range): Failed!")
-        
-    print("\nUnit tests completed.")
 
 def main():
     """
@@ -316,12 +253,15 @@ def main():
 
     while True:
         print("\nImport/Export Management System")
-        print("1. View total trade value")
-        print("2. View transactions by date range (01-01-2020 - 31-12-2023)")
-        print("3. View transactions by country")
-        print("4. View transactions by product")
-        print("5. Run unit tests")
-        print("6. Exit")
+        print("1. Filter transactions")
+        print("2. Sort transactions by value")
+        print("3. Add a new transaction")
+        print("4. Update an existing transaction")
+        print("5. Delete a transaction")
+        print("6. Search transaction by ID")
+        print("7. View transaction summary")
+        print("8. Export transactions to CSV")
+        print("9. Exit")
 
         choice = input("Enter your choice (1-9): ")
 
