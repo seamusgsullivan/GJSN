@@ -263,223 +263,6 @@ def load_data(file_path):
             transactions.append(transaction)
     return transactions
 
-
-
-
-
-
-
-
-
-
-############# new functions 
-
-# get_imports_exports_per_country
-# get_unique_countries
-# show_country_imports_exports
-
-# get_category_counts
-# show_category_counts
-
-# get_total_import_export_counts
-# show_highest_import_export
-
-# updated main
-
-
-def get_imports_exports_per_country(file_path, country_name):
-    """
-    Calculates the number of imports and exports for a specific country.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-        country_name (str): The name of the country to analyze.
-
-    Returns:
-        tuple: A tuple containing the count of imports and exports.
-    """
-    imports = 0
-    exports = 0
-
-    with open(file_path, mode='r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Country'].strip().lower() == country_name.strip().lower():
-                if row['Import_Export'].strip().lower() == "import":
-                    imports += 1
-                elif row['Import_Export'].strip().lower() == "export":
-                    exports += 1
-    return imports, exports
-
-
-def get_unique_countries(file_path):
-    """
-    Returns a sorted list of unique countries from the CSV file.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-
-    Returns:
-        list: A sorted list of unique country names.
-    """
-    countries = []  # List to store all countries found in the "Country" column
-
-    with open(file_path, mode='r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            country = row['Country']
-            countries.append(country)
-
-    unique_countries = set(countries)  # Remove duplicates by converting to a set
-    return sorted(unique_countries)
-
-
-def show_country_imports_exports(file_path):
-    """
-    Prompts the user to select a country and displays its import/export counts.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-    """
-    sorted_countries = get_unique_countries(file_path)  # Get the unique countries
-    print("\nSelect a country from the list below:")
-    for i, country in enumerate(sorted_countries, start=1):
-        print(f"{i}. {country}")
-
-    try:
-        choice = int(input("\nEnter the number corresponding to your choice: "))
-        if 1 <= choice <= len(sorted_countries):
-            selected_country = sorted_countries[choice - 1]
-            imports, exports = get_imports_exports_per_country(file_path, selected_country)
-            print(f"\n      {selected_country}:")
-            print(f"        - Imports: {imports}")
-            print(f"        - Exports: {exports}")
-        else:
-            print("Invalid choice. Please enter a valid number from the list.")
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-
-
-from collections import defaultdict
-# Define the possible product categories
-PRODUCT_CATEGORIES = ["Clothing", "Electronics", "Furniture", "Machinery", "Toys"]
-def get_category_counts(file_path, country_name):
-    """
-    Returns the count of product categories for a specific country based on imports and exports.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-        country_name (str): The name of the country to analyze.
-
-    Returns:
-        dict: A dictionary containing category counts for imports and exports.
-    """
-    import_counts = defaultdict(int)  # Default dict to store import counts per category
-    export_counts = defaultdict(int)  # Default dict to store export counts per category
-
-    with open(file_path, mode='r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Country'].strip().lower() == country_name.strip().lower():
-                category = row['Category'].strip()  # Get the product category
-                if category in PRODUCT_CATEGORIES:  # Ensure the category is one of the defined categories
-                    if row['Import_Export'].strip().lower() == "import":
-                        import_counts[category] += 1  # Increment the import count for the category
-                    elif row['Import_Export'].strip().lower() == "export":
-                        export_counts[category] += 1  # Increment the export count for the category
-
-    # Return both the import and export category counts
-    return dict(import_counts), dict(export_counts)
-
-
-def show_category_counts(file_path):
-    """
-    Prompts the user to select a country and displays the category counts for imports and exports.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-    """
-    sorted_countries = get_unique_countries(file_path)  # Get the unique countries
-    print("\nSelect a country from the list below:")
-    for i, country in enumerate(sorted_countries, start=1):
-        print(f"{i}. {country}")
-
-    try:
-        choice = int(input("\nEnter the number corresponding to your choice: "))
-        if 1 <= choice <= len(sorted_countries):
-            selected_country = sorted_countries[choice - 1]
-            import_counts, export_counts = get_category_counts(file_path, selected_country)
-
-            print(f"\n      {selected_country}:")
-            print("          Imports:")
-            for category in PRODUCT_CATEGORIES:
-                print(f"          - {category}: {import_counts.get(category, 0)}")
-
-            print("\n          Exports:")
-            for category in PRODUCT_CATEGORIES:
-                print(f"          - {category}: {export_counts.get(category, 0)}")
-        else:
-            print("Invalid choice. Please enter a valid number from the list.")
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-
-
-def get_total_import_export_counts(file_path):
-    """
-    Returns the total import and export counts for each country.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-
-    Returns:
-        dict: A dictionary containing total import and export counts for each country.
-    """
-    country_imports = defaultdict(int)  # Default dict to store total import counts per country
-    country_exports = defaultdict(int)  # Default dict to store total export counts per country
-
-    with open(file_path, mode='r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            country = row['Country'].strip()
-            if row['Import_Export'].strip().lower() == "import":
-                country_imports[country] += 1  # Increment the import count for the country
-            elif row['Import_Export'].strip().lower() == "export":
-                country_exports[country] += 1  # Increment the export count for the country
-
-    # Return both the import and export totals
-    return country_imports, country_exports
-
-
-def show_highest_import_export(file_path):
-    """
-    Prompts the user to choose whether to view the country with the highest number of imports or exports.
-
-    Parameters:
-        file_path (str): The path to the CSV file.
-    """
-    country_imports, country_exports = get_total_import_export_counts(file_path)
-
-    print("\nChoose an option:")
-    print("1. Highest imports")
-    print("2. Highest exports")
-    choice = input("Enter the number corresponding to your choice: ")
-
-    if choice == "1":
-        highest_imports_country = max(country_imports, key=country_imports.get)
-        highest_imports_value = country_imports[highest_imports_country]
-        print(f"\n     Country with the highest number of imports:\n      - {highest_imports_country}")
-        print(f"      - Total imports:  {highest_imports_value}")
-
-    elif choice == "2":
-        highest_exports_country = max(country_exports, key=country_exports.get)
-        highest_exports_value = country_exports[highest_exports_country]
-        print(f"\n     Country with the highest number of exports:\n      - {highest_exports_country}")
-        print(f"      - Total exports: {highest_exports_value}")
-
-    else:
-        print("Invalid choice. Please enter 1 or 2.")
-
-
 def main():
     """
     Runs the Import/Export Management System allowing user interaction.
@@ -491,34 +274,20 @@ def main():
     filtered_created = False
 
     while True:
-        print("\n--- Import/Export Insights ---")
-        print("1. View country with the highest number of imports or exports")
-        print("2. View number of imports and exports per country")
-        print("3. View all categories for a country's imports and exports") 
-        print("\n--- Import/Export Management System ---")
-        print("4. Filter transactions")
-        print("5. Sort transactions by value")
-        print("6. Add a new transaction")
-        print("7. Update an existing transaction")
-        print("8. Delete a transaction")
-        print("9. Search transaction by ID")
-        print("10. View transaction summary")
-        print("11. Export transactions to CSV")
-        print("12. Exit")
+        print("\nImport/Export Management System")
+        print("1. Filter transactions")
+        print("2. Sort transactions by value")
+        print("3. Add a new transaction")
+        print("4. Update an existing transaction")
+        print("5. Delete a transaction")
+        print("6. Search transaction by ID")
+        print("7. View transaction summary")
+        print("8. Export transactions to CSV")
+        print("9. Exit")
 
-        choice = input("Enter your choice (1-12): ")
+        choice = input("Enter your choice (1-9): ")
 
-        # New functionality for Import/Export Insights
         if choice == "1":
-            show_highest_import_export(file_path)  # Calls the function to show the country with the highest imports/exports
-        elif choice == "2":
-            show_country_imports_exports(file_path)  # Calls the function to show imports and exports per country
-        elif choice == "3":
-            show_category_counts(file_path)  # Calls the function to show category counts for a country's imports and exports
-        
-        
-        
-        elif choice == "4":
             print("\nFilter Transactions:")
             start_date = input("Enter start date (dd-mm-yyyy) or press Enter to skip: ")
             end_date = input("Enter end date (dd-mm-yyyy) or press Enter to skip: ")
@@ -544,7 +313,7 @@ def main():
             else:
                 print("No transactions match the filters.")
 
-        elif choice == "5":
+        elif choice == "2":
             print("\nSort Transactions by Value:")
             sort_choice = input("Do you want to sort the filtered transactions (f) or all transactions (a)? ").lower()
             if sort_choice == "f" and filtered_created:
@@ -580,7 +349,7 @@ def main():
             else:
                 print("Invalid choice. Either the input was not recognized, or you attempted to use a filtered transaction list when none exists.")
 
-        elif choice == "6":
+        elif choice == "3":
             print("\nAdd a New Transaction:")
             transaction_ID = input("Enter transaction ID: ")
             product = input("Enter product name: ")
@@ -591,7 +360,7 @@ def main():
             system.add_transaction(transaction_ID, product, country, value, date)
             print("Transaction added successfully!")
 
-        elif choice == "7":
+        elif choice == "4":
             print("\nUpdate an Existing Transaction:")
             transaction_ID = input("Enter the transaction ID to update: ")
             product = input("Enter new product name (or press Enter to skip): ")
@@ -608,7 +377,7 @@ def main():
             else:
                 print("Transaction not found.")
 
-        elif choice == "8":
+        elif choice == "5":
             print("\nDelete a Transaction:")
             transaction_ID = input("Enter the transaction ID to delete: ")
             success = system.delete_transaction(transaction_ID)
@@ -617,7 +386,7 @@ def main():
             else:
                 print("Transaction not found.")
 
-        elif choice == "9":
+        elif choice == "6":
             print("\nSearch Transaction by ID:")
             transaction_ID = input("Enter the transaction ID to search for: ")
             transaction = system.search_transaction_by_id(transaction_ID)
@@ -627,7 +396,7 @@ def main():
             else:
                 print("Transaction not found.")
 
-        elif choice == "10":
+        elif choice == "7":
             print("\nTransaction Summary:")
             summary_choice = input("Do you want a summary of the filtered transactions (f) or all transactions (a)? ").lower()
             if summary_choice == "f" and filtered_created:
@@ -643,7 +412,7 @@ def main():
             else:
                 print("Invalid choice. Either the input was not recognized, or you attempted to use a filtered transaction list when none exists.")
 
-        elif choice == "11":
+        elif choice == "8":
             print("\nExport Transactions to CSV:")
             export_choice = input("Do you want to export the filtered transactions (f) or all transactions (a)? ").lower()
             if export_choice == "f" and filtered_created:
@@ -657,17 +426,12 @@ def main():
             else:
                 print("Invalid choice. Either the input was not recognized, or you attempted to use a filtered transaction list when none exists.")
 
-        elif choice == "12":
+        elif choice == "9":
             print("Exiting program...")
             break
 
         else:
-            print("Invalid choice. Please enter a number between 1 and 12.")
-
+            print("Invalid choice. Please enter a number between 1 and 9.")
 
 if __name__ == "__main__":
     main()
-
-
-
-

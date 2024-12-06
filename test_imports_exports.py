@@ -140,6 +140,3 @@ def test_search_transaction_by_id(setup_system):
     transaction = system.search_transaction_by_id("1")
     assert transaction is not None, "Expected to find transaction with ID 1."
     assert transaction.transaction_ID == "1", "Expected transaction ID to be 1."
-    
-    
-    
